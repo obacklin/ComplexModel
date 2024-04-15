@@ -18,27 +18,33 @@ def runge_kutta(func, coordinates, i, t, h):
 
     return coordinates[i] + (1/6)*(k1 + 2*k2 + 2*k3 + k4)
 
-def runge_kutta_3D(coordinates, t, h):
-    return [runge_kutta(dxdt, coordinates, 0, t, h), runge_kutta(dydt, coordinates, 1, t, h), runge_kutta(dzdt, coordinates, 2, t, h)], t + h
+def runge_kutta_3D(x, y, z, t, h):
+    coordinates = [x, y, z]
+    x_new = runge_kutta(dxdt, coordinates, 0, t, h)
+    y_new = runge_kutta(dydt, coordinates, 1, t, h)
+    z_new = runge_kutta(dzdt, coordinates, 2, t, h)
+    return x_new, y_new, z_new
 
 
 if __name__ == "__main__":
     h = 0.01
-    num_steps = 10000
+    num_steps = 100000
 
     fig = plt.figure()
     ax = plt.axes(projection = '3d')
 
-    x = np.array([2])
-    y = np.array([1])
-    z = np.array([1])
+    x = np.empty(num_steps + 1)
+    y = np.empty(num_steps + 1)
+    z = np.empty(num_steps + 1)
+    x[0] = 2
+    y[0] = 1
+    z[0] = 1
     t = 0
 
     for i in range(num_steps):
-        new_coor, t = runge_kutta_3D([x[i], y[i], z[i]], t, h)
-        x = np.append(x, [new_coor[0]])
-        y = np.append(y, [new_coor[1]])
-        z = np.append(z, [new_coor[2]])
+        x[i + 1], y[i + 1], z[i + 1] = runge_kutta_3D(x[i], y[i], z[i], t, h)
+        t += h
+        
 
     ax.plot3D(x, y, z, 'blue')
     plt.show()
