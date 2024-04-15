@@ -82,25 +82,31 @@ if __name__ == "__main__":
     #SetCA rules
     nr_states = 5
     states = [x for x in range(nr_states)]
-    e = 1 # {1,2,..e} are the excited states
+    e = 2 # {1,2,..e} are the excited states
     excited_states = [x for x in range(1, e+1)]
     # Use uniform dist initial on set {0,..., N-1}
     init_state = np.random.randint(low = 0, high = nr_states, size = (nr_rows, nr_cols))
-    nr_steps = 1
-
+    nr_steps = 100
     final_state = run_sim(init_state, nr_states, nr_steps, e)
+    compare = run_sim(final_state, nr_states, 5, e)
 
-    cmap = colors.ListedColormap([ (0,0,0), (187/255,230/255,179/255), (104/255,227/255,79/255),
-                                   (47/255,158/255,25/255) , (15/255,67/255,122/255)])
+    cmap = colors.ListedColormap([ (0,0,0), (187/255,230/255,179/255), (104/255,227/255,79/255), (47/255,158/255,25/255) , (15/255,67/255,122/255)])
     fig, ax = plt.subplots()
     fig2, ax2 = plt.subplots()
+    fig3, ax3 = plt.subplots()
 
+    
     ax.imshow(final_state, cmap=cmap)
     ax2.imshow(init_state, cmap = cmap)
+    ax3.imshow(compare, cmap=cmap)
+
     ax.set_xticks(np.arange(0, nr_rows, 1))
     ax.set_yticks(np.arange(0, nr_cols, 1))
     ax2.set_xticks(np.arange(0, nr_rows, 1))
     ax2.set_yticks(np.arange(0, nr_cols, 1))
+    ax3.set_xticks(np.arange(0, nr_rows, 1))
+    ax3.set_yticks(np.arange(0, nr_cols, 1))
     ax.set_title("Final")
     ax2.set_title("Inital")
+    ax3.set_title("comp")
     plt.show()
