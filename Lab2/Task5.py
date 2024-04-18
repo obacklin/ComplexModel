@@ -3,11 +3,11 @@ import random
 from Task3 import *
 from Task4 import *
 
-def modify_grid(grid,N,e):
+def modify_grid(grid,N,e,nr_modifies):
     nr_rows , nr_cols =grid.shape
     modified_cells = []
     new_grid = grid.copy()
-    for cells in range(5):
+    for cells in range(nr_modifies):
         row = random.randint(0,nr_rows-1)
         col = random.randint(0,nr_cols-1)
         while (row,col) in modified_cells:
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     grid = np.random.randint(low = 0, high = nr_states, size = (nr_rows, nr_cols))
     #period, periodic_grid = find_period(grid, nr_states, e)
     periodic_grid = run_sim(grid,nr_states,100,e)
-    modified_states, modified_grid = modify_grid(periodic_grid, nr_states, e)
+    modified_states, modified_grid = modify_grid(periodic_grid, nr_states, e, 5)
     simulated_modified_grid = run_sim(modified_grid, nr_states , 500, e)
     simulated_periodic_grid = run_sim(periodic_grid, nr_states , 500, e)
     print(modified_states)
@@ -46,18 +46,22 @@ if __name__ == "__main__":
     fig, ax = plt.subplots()
     fig2, ax2 = plt.subplots()
     fig3, ax3 = plt.subplots()
+    fig4, ax4 = plt.subplots()
 
     ax.imshow(simulated_periodic_grid, cmap=cmap)
-    #ax2.imshow(modified_grid, cmap = cmap)
+    ax2.imshow(modified_grid, cmap = cmap)
     ax3.imshow(simulated_modified_grid, cmap = cmap)
-
+    ax4.imshow(periodic_grid, cmap=cmap)
     ax.set_xticks(np.arange(0, nr_rows, 1))
     ax.set_yticks(np.arange(0, nr_cols, 1))
     ax2.set_xticks(np.arange(0, nr_rows, 1))
     ax2.set_yticks(np.arange(0, nr_cols, 1))
     ax3.set_xticks(np.arange(0, nr_rows, 1))
     ax3.set_yticks(np.arange(0, nr_cols, 1))
+    ax4.set_xticks(np.arange(0, nr_rows, 1))
+    ax4.set_yticks(np.arange(0, nr_cols, 1))
     ax.set_title("Simulated periodic grid")
     ax2.set_title("Slightly modified grid")
     ax3.set_title("Simulated modified grid")
+    ax4.set_title("Periodic grid")
     plt.show()
