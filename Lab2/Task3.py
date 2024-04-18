@@ -39,8 +39,9 @@ def save_to_file(output_name, array):
 
 def run_sim(grid, num_states, num_steps, e):
     # Iterates the GH a number of times
+    sim = iterate_CA(grid, num_states, e)
     for i in range(num_steps):
-        sim = iterate_CA(grid, num_states, e)
+        sim = iterate_CA(sim,num_states, e)
     return sim
 
 def nbh_check(grid, i, j, e):
@@ -82,15 +83,15 @@ if __name__ == "__main__":
     #SetCA rules
     nr_states = 5
     states = [x for x in range(nr_states)]
-    e = 2 # {1,2,..e} are the excited states
+    e = 1 # {1,2,..e} are the excited states
     excited_states = [x for x in range(1, e+1)]
     # Use uniform dist initial on set {0,..., N-1}
     init_state = np.random.randint(low = 0, high = nr_states, size = (nr_rows, nr_cols))
-    nr_steps = 100
+    nr_steps = 1000
     final_state = run_sim(init_state, nr_states, nr_steps, e)
     compare = run_sim(final_state, nr_states, 5, e)
 
-    cmap = colors.ListedColormap([ (0,0,0), (187/255,230/255,179/255), (104/255,227/255,79/255), (47/255,158/255,25/255) , (15/255,67/255,122/255)])
+    cmap = colors.ListedColormap([ (0,0,0), (187/255,230/255,179/255), (104/255,227/255,79/255), (47/255,158/255,25/255) , (15/255,67/255,122/255) ])
     fig, ax = plt.subplots()
     fig2, ax2 = plt.subplots()
     fig3, ax3 = plt.subplots()
