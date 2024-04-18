@@ -15,21 +15,21 @@ dzdt = lambda x, y, z, t: x*y - beta*z
 def find_lyapunov(normal, pertubed, h, num_steps, pert):
     """Finds the Lyapunov exponent of for a direction"""
     step_size = int(1/h)
-    delta_values = np.ones(int(num_steps/step_size))
+    lambda_values = np.ones(int(num_steps/step_size))
     t_values = np.arange(1, h*num_steps + 1, 1)
 
     index = 0
     for i in range(step_size, num_steps + 1, step_size):
-        delta_values[index] = (1/t_values[index])*np.log(np.linalg.norm(normal[i] - pertubed[i])/pert)
+        lambda_values[index] = (1/t_values[index])*np.log(np.linalg.norm(normal[i] - pertubed[i])/pert)
         index += 1
 
-    delta  = linregress(t_values, delta_values)[0]
-    return delta
+    lambda_val = linregress(t_values, lambda_values)[0]
+    return lambda_val
 
 if __name__ == "__main__":
     pert = 0.00001 # The pertubation to applied
     h = 0.001 # The step size
-    num_steps = 100000 # The number of steps
+    num_steps = 1000000 # The number of steps
     
 
     # Initializes array and sets start values for the normal and pertubed cases
@@ -52,10 +52,10 @@ if __name__ == "__main__":
         t += h
 
     # Calculates the various lyapunov exponents
-    delta_x = find_lyapunov(normal, x_pert, h, num_steps, pert)
-    delta_y = find_lyapunov(normal, y_pert, h, num_steps, pert)
-    delta_z = find_lyapunov(normal, z_pert, h, num_steps, pert)
+    lambda_x = find_lyapunov(normal, x_pert, h, num_steps, pert)
+    lambda_y = find_lyapunov(normal, y_pert, h, num_steps, pert)
+    lambda_z = find_lyapunov(normal, z_pert, h, num_steps, pert)
 
     # Gets the max
-    delta_max = max([delta_x, delta_y, delta_z])
-    print("The largest Lyapunov exponent along this orbit is:", delta_max)
+    lambda_max = max([lambda_x, lambda_y, lambda_z])
+    print("The largest Lyapunov exponent along this orbit is:", lambda_max)

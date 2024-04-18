@@ -52,4 +52,6 @@ if __name__ == "__main__":
         
 
     ax.plot3D(coor[:, 0], coor[:, 1], coor[:, 2], 'blue')
+    plt.title("Lorenz attractor plotted to t = {} using Runge-Kutta starting at (2, 1, 1)".format(int(t)))
     plt.show()
+    plt.savefig("Lorentzattract.eps", format = "eps")
