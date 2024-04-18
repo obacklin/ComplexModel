@@ -40,7 +40,7 @@ def save_to_file(output_name, array):
 def run_sim(grid, num_states, num_steps, e):
     # Iterates the GH a number of times
     sim = iterate_CA(grid, num_states, e)
-    for i in range(num_steps):
+    for i in range(num_steps-1):
         sim = iterate_CA(sim,num_states, e)
     return sim
 
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     excited_states = [x for x in range(1, e+1)]
     # Use uniform dist initial on set {0,..., N-1}
     init_state = np.random.randint(low = 0, high = nr_states, size = (nr_rows, nr_cols))
-    nr_steps = 1000
+    nr_steps = 10000
     final_state = run_sim(init_state, nr_states, nr_steps, e)
     compare = run_sim(final_state, nr_states, 5, e)
 
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     ax2.set_yticks(np.arange(0, nr_cols, 1))
     ax3.set_xticks(np.arange(0, nr_rows, 1))
     ax3.set_yticks(np.arange(0, nr_cols, 1))
-    ax.set_title("Final")
-    ax2.set_title("Inital")
-    ax3.set_title("comp")
+    ax.set_title("After Simulation with "+str(nr_steps)+" number of iterations" )
+    ax2.set_title("Inital State")
+    ax3.set_title("Comparing when iterating one more period")
     plt.show()

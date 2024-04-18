@@ -6,7 +6,7 @@ def find_period(grid, N, e):
 
 
     # Run sim to go past transient time
-    snapshot = run_sim(grid, N, 10000, e)
+    snapshot = run_sim(grid, N, 100, e)
     iterate = iterate_CA(snapshot,N,e)
     #search for the next time we reach an equal state
     counter = 1
@@ -24,9 +24,10 @@ if __name__ == "__main__":
     start_time = time.perf_counter()
     rows = 50
     cols = 50
-    num_states = 5
+    num_states = 34
     states = [x for x in range(num_states)]
-    e = 1 # {1,2,..e} are the excited states
+    e = 2
+     # {1,2,..e} are the excited states
     excited_states = [x for x in range(1, e+1)]
     # Use uniform dist initial on set {0,..., N-1}
     init_state = np.random.randint(low = 0, high = num_states, size = (rows, cols))
