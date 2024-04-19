@@ -76,18 +76,25 @@ if __name__ == "__main__":
     nr_rows = 50
     nr_cols = 50
 
-    mat = read_from_file("Lab2/test.txt")
-    print(mat)
-    save_to_file("Lab2/out.txt", mat)
+    # mat = read_from_file("Lab2/test.txt")
+    # print(mat)
+    # save_to_file("Lab2/out.txt", mat)
 
     #SetCA rules
     nr_states = 5
     states = [x for x in range(nr_states)]
-    e = 1 # {1,2,..e} are the excited states
+    e = 3 # {1,2,..e} are the excited states
     excited_states = [x for x in range(1, e+1)]
     # Use uniform dist initial on set {0,..., N-1}
     init_state = np.random.randint(low = 0, high = nr_states, size = (nr_rows, nr_cols))
-    nr_steps = 10000
+    nr_steps = 1000
+
+    init_state = np.zeros((nr_rows,nr_cols))
+    # Create some islands:
+    init_state[1:4, 1:4] = 1
+    init_state[45:49, 45:49] = 2
+
+
     final_state = run_sim(init_state, nr_states, nr_steps, e)
     compare = run_sim(final_state, nr_states, 5, e)
 
@@ -96,17 +103,12 @@ if __name__ == "__main__":
     fig2, ax2 = plt.subplots()
     fig3, ax3 = plt.subplots()
 
-    
     ax.imshow(final_state, cmap=cmap)
     ax2.imshow(init_state, cmap = cmap)
     ax3.imshow(compare, cmap=cmap)
-
-    ax.set_xticks(np.arange(0, nr_rows, 1))
-    ax.set_yticks(np.arange(0, nr_cols, 1))
-    ax2.set_xticks(np.arange(0, nr_rows, 1))
-    ax2.set_yticks(np.arange(0, nr_cols, 1))
-    ax3.set_xticks(np.arange(0, nr_rows, 1))
-    ax3.set_yticks(np.arange(0, nr_cols, 1))
+    ax.axis("off")
+    ax2.axis("off")
+    ax3.axis("off")
     ax.set_title("After Simulation with "+str(nr_steps)+" number of iterations" )
     ax2.set_title("Inital State")
     ax3.set_title("Comparing when iterating one more period")
