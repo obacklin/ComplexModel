@@ -42,7 +42,7 @@ if __name__ == "__main__":
     # Creates an array for the values
     coor = np.empty((num_steps + 1, 3))
     # Sets (x_0, y_0, z_0)
-    coor[0] = [2, 1, 1]
+    coor[0] = [20, 10, 10]
     t = 0
 
     for i in range(num_steps):

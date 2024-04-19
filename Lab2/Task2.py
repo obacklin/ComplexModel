@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.stats import linregress
+import matplotlib.pyplot as plt
 from Task1 import *
 
 # The constants for the Lorenz system
@@ -13,23 +14,23 @@ dydt = lambda x, y, z, t: x*(rho - z) - y
 dzdt = lambda x, y, z, t: x*y - beta*z
 
 def find_lyapunov(normal, pertubed, h, num_steps, pert):
-    """Finds the Lyapunov exponent of for a direction"""
+    """Finds the Lyapunov exponent of a pertubation"""
     step_size = int(1/h)
-    lambda_values = np.ones(int(num_steps/step_size))
+    lambda_values = np.empty(int(num_steps/step_size))
     t_values = np.arange(1, h*num_steps + 1, 1)
 
     index = 0
     for i in range(step_size, num_steps + 1, step_size):
-        lambda_values[index] = (1/t_values[index])*np.log(np.linalg.norm(normal[i] - pertubed[i])/pert)
+        lambda_values[index] = np.log(np.linalg.norm(pertubed[i] - normal[i])/pert)
         index += 1
-
+    
     lambda_val = linregress(t_values, lambda_values)[0]
     return lambda_val
 
 if __name__ == "__main__":
-    pert = 0.00001 # The pertubation to applied
+    pert = 1e-11 # The pertubation to be applied
     h = 0.001 # The step size
-    num_steps = 1000000 # The number of steps
+    num_steps = 40000 # The number of steps
     
 
     # Initializes array and sets start values for the normal and pertubed cases
