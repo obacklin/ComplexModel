@@ -23,48 +23,110 @@ class hex_gird:
         # For each cell take get the neighbours and move
         pass
 
+class Person:
+    # 1: S
+    # 2: I
+    # 3: R
+    # 4: V
+    def __init__(self, status, vaccine):
+        self.status = status # S I R?
+        self.immunity = 0
+        if self.status == "vaccinated":
+            self.to_recovery = k
+    
+    def update(self, prob):
+        if self.immunity == 0 and self.status == "sus":
+            sample = random.random()
+            if(sample < prob):
+                self.status = "infected"
+                self.to_recovery = k
+
+        if self.status == "recovered":
+            self.immunity -= 1
+            if self.immunity == 0:
+                self.status = "sus"
+
+        if self.status == "vaccinated":
+            self.to_recovery -= 1
+            if self.to_recovery == 0:
+                self.status = "recovered"
+                self.immunity = l
+    
+    def get_status(self):
+        return self.status
+    
+    def is_infected(self):
+        return True if self.status == "infected" else False
+       
 class Cell:
     def __init__(self, hex, population, num_rest_channels, model_states):
         self.hex = hex
         self.population = population
         self.num_rest_channel = num_rest_channels
-        self.velocity_channels = [0 for i in range(6)] # 0,..5 should only be len 6
-        self.rest_channel = [0 for i in range(num_rest_channels)] # should be len rest_channels
-        self.infection_probabilitiy = 0.1
+        self.num_vel_channel = 6 # The number of vel chanels
+        self.velocity_channel = [None]*self.num_vel_channel # 0,..5 should only be len 6
+        self.rest_channel = [None]*self.num_rest_channel # should be len rest_channels
+        self.infection_probabilitiy = 0.1 # User defined parameter
+        self.recover_probability = 0.05 # User defined parameter
         # Create inital randomish population in cell
         for i in range(population):
-            # Sample
-            x = random.randint(0,1)
-            if(x == 0):
-                # Add to vel channel
-                index = random.randint(0,5)
-                self.velocity_channels[index] = random.randint(1,4)
-                # 1: S
-                # 2: I
-                # 3: R
-                # 4: V
-            else:
-                # Add to rest
-                index = random.randint(0, num_rest_channels-1)
-                self.rest_channels[index] = random.randint(1,4)
+                person = Person() # Decide on this!!!
+                placed = False
+                while not placed:
+                    # Place until a position is found
+                    x = random.randint(0, 1) # Velocity or Rest
+                    if(x == 0):
+                        y = random.randint(0, self.num_rest_channel - 1)
+                        if( not self.rest_channel[y] ):
+                            # Channel is empty insert person
+                            self.rest_channel[y] = person
+                            placed = True
+                    else:
+                        y = random.randint(0, self.num_vel_channel - 1)
+                        if( not self.velocity_channel[y]):
+                            # Channel is empty insert person
+                            self.velocity_channel[y] = person
+                            placed = True
     
     def contact_interaction(self):
         # Count number of infected
         num_infected = 0
-        for i in range(len(self.velocity_channels)):
-            if self.velocity_channels[i] == 2: # Infected
+        cell_population = self.rest_channel + self.velocity_channel
+        for person in cell_population:
+            if person.is_infected() == True:
                 num_infected += 1
-        for i in range(len(self.rest_channel)):
-            if self.rest_channel[i] == 2: # Infected
-                num_infected += 1
+        # Compute the probability
+        probability = 1 -(1 - self.infection_probabilitiy)**num_infected
+        # Update status; infect, recover etc
+        for person in cell_population:
+            person.update(probability, self.recover_probability)
         
-    def random_movement():
-        pass
-    
-
-
-
-
+    def random_movement(self):
+        # Get population
+        cell_population = self.rest_channel + self.velocity_channel
+        # Shuffle list
+        random.shuffle(cell_population)
+        self.rest_channel = [None]*self.num_rest_channel
+        self.velocity_channel = [None]*self.num_vel_channel
+        # Distribute people randomly around the channels
+        
+        for person in cell_population:
+            placed = False
+            while not placed:
+                # Place until a position is found
+                x = random.randint(0, 1) # Velocity or Rest
+                if(x == 0):
+                    y = random.randint(0, self.num_rest_channel - 1)
+                    if( not self.rest_channel[y] ):
+                        # Channel is empty insert person
+                        self.rest_channel[y] = person
+                        placed = True
+                else:
+                    y = random.randint(0, self.num_vel_channel - 1)
+                    if( not self.velocity_channel[y]):
+                        # Channel is empty insert person
+                        self.velocity_channel[y] = person
+                        placed = True
 
 
 
