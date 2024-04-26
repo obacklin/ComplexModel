@@ -75,12 +75,11 @@ def hex_linedraw(a, b):
     return results
 
 
-
-
 OffsetCoord = collections.namedtuple("OffsetCoord", ["col", "row"])
 
 EVEN = 1
 ODD = -1
+
 def qoffset_from_cube(offset, h):
     col = h.q
     row = h.r + (h.q + offset * (h.q & 1)) // 2
@@ -96,6 +95,12 @@ def qoffset_to_cube(offset, h):
         raise ValueError("offset must be EVEN (+1) or ODD (-1)")
     return Hex(q, r, s)
 
+def qoffset_wraparound_to_hex(offset_cord, max_col, max_rows):
+    col = offset_cord.col % max_col
+    row = offset_cord.row % max_rows
+    # Should give back the corresponding Hex
+    return qoffset_to_cube(ODD, OffsetCoord(col, row))
+
 def roffset_from_cube(offset, h):
     col = h.q + (h.r + offset * (h.r & 1)) // 2
     row = h.r
@@ -110,8 +115,6 @@ def roffset_to_cube(offset, h):
     if offset != EVEN and offset != ODD:
         raise ValueError("offset must be EVEN (+1) or ODD (-1)")
     return Hex(q, r, s)
-
-
 
 
 DoubledCoord = collections.namedtuple("DoubledCoord", ["col", "row"])
