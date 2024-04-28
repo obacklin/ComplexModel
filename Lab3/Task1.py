@@ -1,5 +1,7 @@
 from hex_funcs import *
 import random
+import matplotlib.pyplot as plt
+import numpy as np
 
 class Person:
     def __init__(self, status:str):
@@ -11,6 +13,9 @@ class Person:
             self.to_recovery = self.k
     
     def __str__(self) -> str:
+        return self.status
+    
+    def __repr__(self) -> str:
         return self.status
     
     def update(self, prob, recover_prob):
@@ -92,13 +97,13 @@ class Cell:
         num_infected = 0
         cell_population = self.rest_channel + self.velocity_channel
         for person in cell_population:
-            if (person is not None) and person.is_infected():
+            if person and person.is_infected():
                 num_infected += 1
         # Compute the probability
         probability = 1 -(1 - self.infection_probabilitiy)**num_infected
         # Update status; infect, recover etc
         for person in cell_population:
-            if person is not None:
+            if person:
                 person.update(probability, self.recover_probability)
         
     def random_movement(self):
@@ -134,6 +139,54 @@ class Cell:
     def switch_velocity_channel(self):
         self.velocity_channel = self.temp_velocity_channel
 
+    def remove_person(self, person):
+        for i in range(len(self.rest_channel)):
+            if self.rest_channel[i] == person:
+                self.rest_channel[i] = None
+        for i in range(len(self.velocity_channel)):
+            if self.velocity_channel[i] == person:
+                self.velocity_channel[i] = None
+    
+    def calc_population(self):
+        population = 0
+        for person in self.rest_channel:
+            if person:
+                population += 1
+        for person in self.velocity_channel:
+            if person:
+                population += 1
+        self.population = population
+
+    def demographic(self):
+        susceptible = 0
+        infected = 0
+        vaccinated = 0
+        recovered = 0
+        for person in self.rest_channel:
+            if person:
+                if person.status == "sus":
+                    susceptible += 1
+                elif person.status == "infected":
+                    infected += 1
+                elif person.status == "vaccinated":
+                    vaccinated += 1
+                else:
+                    recovered += 1
+
+        for person in self.velocity_channel:
+            if person:
+                if person.status == "sus":
+                    susceptible += 1
+                elif person.status == "infected":
+                    infected += 1
+                elif person.status == "vaccinated":
+                    vaccinated += 1
+                else:
+                    recovered += 1
+
+        return susceptible, infected, vaccinated, recovered
+
+
 class Hex_grid:
     
     def __init__(self, right:int, bottom:int) -> None:    
@@ -142,6 +195,7 @@ class Hex_grid:
             q_offset = math.floor(q/2.0)
             for r in range(0-q_offset, bottom - q_offset +1):
                 self.grid[Hex(q,r,-q-r)] =  Cell(random.randint(0,8), 2)
+
         # Find max column, row in offset cords
         self.col = 0
         self.row = 0
@@ -160,9 +214,8 @@ class Hex_grid:
             cell_value.contact_interaction() # Infect, recover, etc
             cell_value.random_movement() # random_movement
             for i, person in enumerate(cell_value.velocity_channel):
-                if person != None:
+                if person:
                     self.transfer_person(hex_key, person, i)
-        
         # Switch vel_channels
         for hex_key, cell_value in self.grid.items():
             cell_value.switch_velocity_channel()
@@ -175,9 +228,48 @@ class Hex_grid:
 
         neighbour_cell = self.grid[neighbour_hex]
         neighbour_cell.receive_new_person(person, direction)
+    #    self.grid[curr_hex].remove_person(person)
+
+    def hex_grid_demographic(self):
+        susceptible = 0
+        infected = 0
+        vaccinated = 0
+        recovered = 0
+        for hex_key, cell_value in self.grid.items():
+            sus_in_cell, inf_in_cell, vac_in_cell, rec_in_cell = cell_value.demographic()
+            susceptible += sus_in_cell
+            infected += inf_in_cell
+            vaccinated += vac_in_cell
+            recovered += rec_in_cell
+
+        return susceptible, infected, vaccinated, recovered
+    
+    def calc_population(self):
+        population = 0
+        for hex_key, cell_value in self.grid.items():
+            cell_value.calc_population()
+            population += cell_value.population
+        
+        return population
 
 
 if __name__ == "__main__":
+    steps = 10
     grid = Hex_grid(20, 20)
-    for i in range(10):
+    # susceptible = np.empty(steps + 1)
+    # infected = np.empty(steps + 1)
+    # vaccinated = np.empty(steps + 1)
+    # recovered = np.empty(steps + 1)
+
+    # susceptible[0], infected[0], vaccinated[0], recovered[0] = grid.hex_grid_demographic()
+    for i in range(steps):
         grid.propagate_step()
+        # susceptible[i], infected[i], vaccinated[i], recovered[i] = grid.hex_grid_demographic()
+        # grid.calc_population()
+
+    # x = np.linspace(0, steps, steps + 1)
+    # plt.plot(x, susceptible)
+    # plt.plot(x, infected)
+    # plt.plot(x, vaccinated)
+    # plt.plot(x, recovered)
+    # plt.show()
