@@ -2,13 +2,14 @@ from hex_funcs import *
 import random
 import matplotlib.pyplot as plt
 import numpy as np
+import time
 
 class Person:
     def __init__(self, status:str):
         self.status = status # S I R?
         self.immunity = 0
-        self.k = 10
-        self.l = 20
+        self.k = 3
+        self.l = 30
         if self.status == "vaccinated":
             self.to_recovery = self.k
     
@@ -58,15 +59,25 @@ class Cell:
         self.temp_velocity_channel = [None]*self.num_vel_channel
         self.infection_probabilitiy = 0.1 # User defined parameter
         self.recover_probability = 0.05 # User defined parameter
-        # Create inital randomish population in cell
-        for i in range(population):
+
+    
+    def __str__(self) -> str:
+        return f"Cell: {self.population}"
+    
+    def __repr__(self) -> str:
+        return f"Cell({self.population}, {self.num_rest_channel})"
+    
+    def populate(self, prop_infected, prop_vaccinated):
+        """Create initial random population in a cell"""
+        self.empty()
+        for i in range(self.population):
                 sample = random.random()
-                if sample < 1/3:
-                    initial_status = "sus"
-                elif sample < 2/3:
+                if sample < prop_infected:
                     initial_status = "infected"
-                else:
+                elif sample < prop_infected + prop_vaccinated:
                     initial_status = "vaccinated"
+                else:
+                    initial_status = "sus"
 
                 person = Person(initial_status) # Decide on this!!!
                 placed = False
@@ -85,13 +96,11 @@ class Cell:
                             # Channel is empty insert person
                             self.velocity_channel[y] = person
                             placed = True
-    
-    def __str__(self) -> str:
-        return f"Cell: {self.population}"
-    
-    def __repr__(self) -> str:
-        return f"Cell({self.population}, {self.num_rest_channel})"
-    
+
+    def empty(self):
+        self.rest_channel = [None]*self.num_rest_channel
+        self.velocity_channel = [None]*self.num_vel_channel
+
     def contact_interaction(self):
         # Count number of infected
         num_infected = 0
@@ -137,7 +146,9 @@ class Cell:
         self.temp_velocity_channel[position] = person
     
     def switch_velocity_channel(self):
+
         self.velocity_channel = self.temp_velocity_channel
+        self.temp_velocity_channel = [None]*self.num_vel_channel
 
     def remove_person(self, person):
         for i in range(len(self.rest_channel)):
@@ -228,7 +239,6 @@ class Hex_grid:
 
         neighbour_cell = self.grid[neighbour_hex]
         neighbour_cell.receive_new_person(person, direction)
-    #    self.grid[curr_hex].remove_person(person)
 
     def hex_grid_demographic(self):
         susceptible = 0
@@ -252,24 +262,64 @@ class Hex_grid:
         
         return population
 
+    def place_ring(self):
+        center = OffsetCoord(round(self.col/2), round(self.row/2))
+        center = qoffset_to_cube(ODD, center)
+        radius = round(min(self.col,self.row)/3)
+        assert(radius > 1)
+        vaccinated_tiles = hex_ring(center, radius) # A list of hexes
+        infected_tiles = hex_spiral(center, radius - 1) # A list
+        infected_prop_parameter = 0.3
+        # Populate
+        for tile in self.grid.values():
+            tile.populate(0,0)
+
+        for tile in vaccinated_tiles:
+            self.grid[tile].populate(0,1)
+
+        for tile in infected_tiles:
+            self.grid[tile].populate(infected_prop_parameter, 0)
+        
+    
+    def populate_grid(self, type = "", prop_infected=0.1, prop_vaccinated=0.2):
+        
+        if type.lower() == "ring":
+            self.place_ring()
+        else:
+            for cell in self.grid.values():
+                x = random
+                cell.populate(prop_infected, prop_vaccinated)
+
+
+def plot_grid():
+    pass
+
+
 
 if __name__ == "__main__":
-    steps = 10
-    grid = Hex_grid(20, 20)
-    # susceptible = np.empty(steps + 1)
-    # infected = np.empty(steps + 1)
-    # vaccinated = np.empty(steps + 1)
-    # recovered = np.empty(steps + 1)
+    start_time = time.perf_counter()
+    steps = 1
+    grid = Hex_grid(50,50)
+    grid.populate_grid("ring")
+    # print("Initial population:", grid.calc_population())
+    grid.propagate_step()
+    time_taken = time.perf_counter() - start_time
+    print("Done!, time: ", time_taken)
+    # susceptible = np.empty(steps)
+    # infected = np.empty(steps)
+    # vaccinated = np.empty(steps)
+    # recovered = np.empty(steps)
 
     # susceptible[0], infected[0], vaccinated[0], recovered[0] = grid.hex_grid_demographic()
-    for i in range(steps):
-        grid.propagate_step()
-        # susceptible[i], infected[i], vaccinated[i], recovered[i] = grid.hex_grid_demographic()
-        # grid.calc_population()
+    # for i in range(steps):
+    #     grid.propagate_step()
+    #     susceptible[i], infected[i], vaccinated[i], recovered[i] = grid.hex_grid_demographic()
+    #     #print(grid.calc_population())
 
-    # x = np.linspace(0, steps, steps + 1)
+    # x = np.linspace(0, steps, steps)
     # plt.plot(x, susceptible)
     # plt.plot(x, infected)
     # plt.plot(x, vaccinated)
     # plt.plot(x, recovered)
+    # plt.legend(["sus","inf","vaxx", "rec"])
     # plt.show()
