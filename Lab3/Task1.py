@@ -254,22 +254,25 @@ class Hex_grid:
 
 
 if __name__ == "__main__":
-    steps = 10
+    steps = 30
     grid = Hex_grid(20, 20)
-    # susceptible = np.empty(steps + 1)
-    # infected = np.empty(steps + 1)
-    # vaccinated = np.empty(steps + 1)
-    # recovered = np.empty(steps + 1)
+    susceptible = np.empty(steps + 1)
+    infected = np.empty(steps + 1)
+    vaccinated = np.empty(steps + 1)
+    recovered = np.empty(steps + 1)
 
-    # susceptible[0], infected[0], vaccinated[0], recovered[0] = grid.hex_grid_demographic()
+    susceptible[0], infected[0], vaccinated[0], recovered[0] = grid.hex_grid_demographic()
     for i in range(steps):
         grid.propagate_step()
-        # susceptible[i], infected[i], vaccinated[i], recovered[i] = grid.hex_grid_demographic()
-        # grid.calc_population()
+        susceptible[i], infected[i], vaccinated[i], recovered[i] = grid.hex_grid_demographic()
+        grid.calc_population()
 
-    # x = np.linspace(0, steps, steps + 1)
-    # plt.plot(x, susceptible)
-    # plt.plot(x, infected)
-    # plt.plot(x, vaccinated)
-    # plt.plot(x, recovered)
-    # plt.show()
+    x = np.linspace(0, steps, steps + 1)
+
+    plt.plot(x, susceptible,'blue')
+    plt.plot(x, infected,'red')
+    plt.plot(x, vaccinated,'green')
+    
+    plt.plot(x, recovered,'yellow')
+    plt.legend(['sus','inf','vac','rec'])
+    plt.show()
