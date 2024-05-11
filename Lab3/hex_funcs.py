@@ -74,6 +74,23 @@ def hex_linedraw(a, b):
         results.append(hex_round(hex_lerp(a_nudge, b_nudge, step * i)))
     return results
 
+# Find ring hexes:
+def hex_ring(hex_center, radius):
+    results = []
+    hex_curr = hex_add(hex_center, hex_scale(hex_directions[4], radius))
+    for i in range(6):
+        for j in range(radius):
+            results.append(hex_curr)
+            hex_curr = hex_neighbor(hex_curr,i)
+    return results
+
+# Find Spiral:
+def hex_spiral(hex_center, radius):
+    results = [hex_center]
+    for i in range(1, radius + 1):
+        results += hex_ring(hex_center, i)
+    return results
+
 
 OffsetCoord = collections.namedtuple("OffsetCoord", ["col", "row"])
 
