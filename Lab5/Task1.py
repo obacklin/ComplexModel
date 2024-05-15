@@ -17,10 +17,10 @@ class Particle:
         np.arccos(self.x_vel/np.sqrt(self.x_vel**2 + self.y_vel**2))
 
     def update(self, delta_t):
-        rho1 = 0.2
-        rho2 = 0.3
+        rho1 = 0.5
+        rho2 = 0.2
         rho3 = 0.2
-        rho4 = 0.3
+        rho4 = 0.1
         self.x_pos += self.x_vel*delta_t
         self.y_pos += self.y_vel*delta_t
         self.x_vel = rho1*self.repell_vec()[0] + rho2*self.align_vec(self.align)[0] + rho3*self.attract_vec(self.attract)[0]  + rho4*self.x_vel
@@ -58,7 +58,9 @@ class Particle:
         #compute the normalized vector from the center of mass to the particle    
         center = self.center_of_mass(self.repell)
         e_1 = (self.x_pos -center[0], self.y_pos-center[1])
-        vec = [e_1[0]/np.sqrt(e_1[0]**2+e_1[1]**2),e_1[1]/np.sqrt(e_1[0]**2+e_1[1]**2)]
+        if e_1 == (0,0):
+            return (self.x_vel,self.y_vel)
+        vec = ( e_1[0]/np.sqrt(e_1[0]**2+e_1[1]**2) , e_1[1]/np.sqrt(e_1[0]**2+e_1[1]**2) )
         return vec
     
     def align_vec(self, parts):
@@ -68,6 +70,7 @@ class Particle:
             # Compute angle for particle
             
             angles.append(np.arctan(p.y_pos/p.x_pos))
+        angles.append(np.arctan(self.y_pos/self.x_pos))
         
         p_sin = 0
         p_cos = 0
@@ -78,7 +81,7 @@ class Particle:
         
         p_measure = np.sqrt(p_sin**2 + p_cos**2)/len(parts)
 
-        newangle = np.arctan(np.sum([np.sin(angle) for angle in angles]/np.sum([np.cos(angle) for angle in angles]))) #+ random.uniform([-np.pi/6,np.pi/6])
+        newangle = np.arctan(np.sum([np.sin(angle) for angle in angles]/np.sum([np.cos(angle) for angle in angles]))) + random.uniform(-np.pi/6,np.pi/6)
         return (p_measure*np.cos(newangle),p_measure*np.sin(newangle))
 
     def attract_vec(self, parts):
@@ -86,7 +89,7 @@ class Particle:
 
         e_1 = (self.x_pos -center[0], self.y_pos-center[1])
         if e_1 == (0,0):
-            return e_1
+            return (self.x_vel,self.y_vel)
         else:
             vec = (-e_1[0]/np.sqrt(e_1[0]**2+e_1[1]**2),-e_1[1]/np.sqrt(e_1[0]**2+e_1[1]**2))
         return vec
@@ -115,8 +118,9 @@ class Simulation:
         anim = animation.FuncAnimation(self.fig,self.update,frames=self.steps,init_func=self.initial_animation, blit=True)
         plt.show()
 if __name__ == "__main__":
-
-    particles = [Particle(np.random.uniform(-30,30), np.random.uniform(-30,30), np.random.uniform(-1,1), np.random.uniform(-1,1)) for _ in range(100)]
+    x=[random.uniform(-1,1) for _ in range(100)]
+    particles = [Particle(np.random.uniform(-30,30), np.random.uniform(-30,30), x[i], (random.randint(0,1)-1/2)*2*np.sqrt(1-x[i]**2)) for i in range(100)]
+    print([p.x_vel**2 + p.y_vel**2 for p in particles])
     simulation = Simulation(50,particles)
     simulation.animate()
-    print([p.x_pos for p in particles])
+    print([p.x_vel**2 + p.y_vel**2 for p in particles])
