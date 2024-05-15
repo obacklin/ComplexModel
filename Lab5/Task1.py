@@ -1,6 +1,8 @@
 import numpy as np
-
-class particle:
+import random
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+class Particle:
     def __init__(self,x,y, x_vel, y_vel) -> None:
         self.x_pos = x
         self.y_pos = y
@@ -16,55 +18,56 @@ class particle:
 
     def update(self, delta_t):
         rho1 = 0.2
-        rho2 = 0.2
+        rho2 = 0.3
         rho3 = 0.2
-        rho4 = 0.2
+        rho4 = 0.3
         self.x_pos += self.x_vel*delta_t
         self.y_pos += self.y_vel*delta_t
-        #self.x_vel = rho1*bla + rho2*bla2 + rho3* + rho4*self.x_vel
-        #self.y_vel = rho1*bla + rho2*bla2 + rho3* + rho4*self.y_vel
+        self.x_vel = rho1*self.repell_vec()[0] + rho2*self.align_vec(self.align)[0] + rho3*self.attract_vec(self.attract)[0]  + rho4*self.x_vel
+        self.y_vel = rho1*self.repell_vec()[1] + rho2*self.align_vec(self.align)[1] + rho3*self.attract_vec(self.attract)[1] + rho4*self.y_vel
         
         
     def influence(self, particles):
+
         self.repell = [] # Zone 1
         self.align  = [] # Zone 2
         self.attract  = [] # Zone 3
-
         for p in particles:
-            if p != self:
-                distance = np.sqrt((self.x_pos - p.x_pos)**2 + (self.y_pos- p.y_pos)**2)
-                if distance < self.rad1:
-                    self.repell += [p]
-                elif distance < self.rad2:
-                    self.align += [p]
-                elif distance < self.rad3:
-                    self.attract += [p]
+            distance = np.sqrt((self.x_pos - p.x_pos)**2 + (self.y_pos- p.y_pos)**2)
+            if distance < self.rad1:
+                self.repell += [p]
+            elif distance < self.rad2:
+                self.align += [p]
+            elif distance < self.rad3:
+                self.attract += [p]
 
-    def center_of_mass_in_zone(parts):
+    def center_of_mass(self,parts):
         x_center = 0
         y_center = 0
         n_count = 0
-
         for p in parts:
             x_center += p.x_pos
             y_center += p.y_pos
             n_count += 1
         # Should return the angle instead?
+        if n_count == 0:
+            return(0,0)
         return (x_center/n_count, y_center/n_count) 
-    
-    def vec_away_from_mass(self, particles):
-        #compute the normalized vector from the center of mass to the particle
-        self.influence(particles)
-        center = self.center_of_mass_in_zone(self.repell)
+
+    def repell_vec(self):
+        #compute the normalized vector from the center of mass to the particle    
+        center = self.center_of_mass(self.repell)
         e_1 = (self.x_pos -center[0], self.y_pos-center[1])
-        e_1 = e_1/np.sqrt(e_1[0]**2+e_1[1]**2)
+        vec = [e_1[0]/np.sqrt(e_1[0]**2+e_1[1]**2),e_1[1]/np.sqrt(e_1[0]**2+e_1[1]**2)]
+        return vec
     
-    def polarization(self, parts):
+    def align_vec(self, parts):
         # For zone 
         angles = []
         for p in parts:
             # Compute angle for particle
-            angles.append(np.arctan(p.y/p.x))
+            
+            angles.append(np.arctan(p.y_pos/p.x_pos))
         
         p_sin = 0
         p_cos = 0
@@ -73,11 +76,47 @@ class particle:
             p_sin += np.sin(theta)
             p_cos += np.cos(theta)
         
-        p_measure = np.sqrt(p_sin**2 + p_cos**2)/len(angles)
+        p_measure = np.sqrt(p_sin**2 + p_cos**2)/len(parts)
 
-class simulation:
-    def __init__(self) -> None:
-        pass
+        newangle = np.arctan(np.sum([np.sin(angle) for angle in angles]/np.sum([np.cos(angle) for angle in angles]))) #+ random.uniform([-np.pi/6,np.pi/6])
+        return (p_measure*np.cos(newangle),p_measure*np.sin(newangle))
 
+    def attract_vec(self, parts):
+        center=self.center_of_mass(parts)
+
+        e_1 = (self.x_pos -center[0], self.y_pos-center[1])
+        if e_1 == (0,0):
+            return e_1
+        else:
+            vec = (-e_1[0]/np.sqrt(e_1[0]**2+e_1[1]**2),-e_1[1]/np.sqrt(e_1[0]**2+e_1[1]**2))
+        return vec
+   
+        
+class Simulation:
+    def __init__(self,steps,particles):
+        self.steps = steps
+        self.particles = particles
+        self.fig, self.ax =plt.subplots()
+        self.ax.set_xlim(-100, 100)
+        self.ax.set_ylim(-100, 100)
+        self.scatter = self.ax.scatter([],[])
+    def initial_animation(self):
+        self.scatter.set_offsets([0,0])
+        return self.scatter,
+    
+    def update(self,frame):
+        for p in self.particles:
+            p.influence(self.particles)
+            p.update(1)
+        self.scatter.set_offsets([[p.x_pos,p.y_pos] for p in self.particles])
+        return self.scatter,
+        
+    def animate(self):
+        anim = animation.FuncAnimation(self.fig,self.update,frames=self.steps,init_func=self.initial_animation, blit=True)
+        plt.show()
 if __name__ == "__main__":
-    pass
+
+    particles = [Particle(np.random.uniform(-30,30), np.random.uniform(-30,30), np.random.uniform(-1,1), np.random.uniform(-1,1)) for _ in range(100)]
+    simulation = Simulation(50,particles)
+    simulation.animate()
+    print([p.x_pos for p in particles])
