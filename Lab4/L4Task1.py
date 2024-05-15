@@ -1,6 +1,5 @@
 import numpy as np
 import urllib.request
-import urllib3
 import matplotlib.pyplot as plt
 import re
 from igraph import *
@@ -43,7 +42,8 @@ g.es["arrow_size"]= 0.8
 
 
 partition = la.find_partition(g,la.ModularityVertexPartition)
-plot(partition)
+fig=plot(partition)
+fig.save("Lab4/clustergraph.png")
 #Found clusters
 clusterlist = [[1,7,13,14,15,18,25,29], [9,12,16,19,20,21,30,33],[2,5,10,23,24,28,31,34],[3,4,11,22,26,27],[0,6,8,17,32]]
 clusters = [g.subgraph(i) for i in clusterlist]
@@ -56,7 +56,10 @@ for cluster in clusters:
     edgesum = 0
     for row in cluster_mx:
         edgesum += sum(row)
-    print(edgesum)
 
     mod_g += edgesum/m - edgesum**2/(4*m**2)
+<<<<<<< HEAD
 print(f' Modularity of partition: {mod_g}')
+=======
+print(f' Modularity of partition: {mod_g}')
+>>>>>>> d70fa013154909847b8599aeddce02921b7bf23e

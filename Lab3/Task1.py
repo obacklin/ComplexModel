@@ -333,6 +333,30 @@ class Hex_grid:
             
 
 if __name__ == "__main__":
+<<<<<<< HEAD
+    steps = 30
+    grid = Hex_grid(20, 20)
+    susceptible = np.empty(steps + 1)
+    infected = np.empty(steps + 1)
+    vaccinated = np.empty(steps + 1)
+    recovered = np.empty(steps + 1)
+
+    susceptible[0], infected[0], vaccinated[0], recovered[0] = grid.hex_grid_demographic()
+    for i in range(steps):
+        grid.propagate_step()
+        susceptible[i], infected[i], vaccinated[i], recovered[i] = grid.hex_grid_demographic()
+        grid.calc_population()
+
+    x = np.linspace(0, steps, steps + 1)
+
+    plt.plot(x, susceptible,'blue')
+    plt.plot(x, infected,'red')
+    plt.plot(x, vaccinated,'green')
+    
+    plt.plot(x, recovered,'yellow')
+    plt.legend(['sus','inf','vac','rec'])
+    plt.show()
+=======
 
     time_start = time.perf_counter()
     steps = 80
@@ -389,3 +413,4 @@ if __name__ == "__main__":
     plt.ylabel("Number of infected")
     plt.legend(["Barrier", "No barrier"])
     plt.savefig("Average_infected.eps", format = "eps", bbox_inches = 'tight')
+>>>>>>> 15c66049dd9a909adda30845a048ce3e7bb24d9d
