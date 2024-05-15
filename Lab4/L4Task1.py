@@ -60,4 +60,3 @@ for cluster in clusters:
 
     mod_g += edgesum/m - edgesum**2/(4*m**2)
 print(f' Modularity of partition: {mod_g}')
-print((37+23+26+20+18)/m)

@@ -28,17 +28,17 @@ def plot_C(n,nr_graphs):
             G = ER_graph(n,p)
             mean_c_coeff += cluster_coeff(G)/nr_graphs
         c_coeffs.append(mean_c_coeff)
-
+    print(c_coeffs)
     plt.plot(p_lst,c_coeffs,"blue",label=("Calculated"))
     plt.xlabel("p")
     plt.ylabel("C")
     plt.title("Clustering coefficient C vs proabilities p")
     plt.legend()
     plt.show()
-
+plot_C(50,10)
 p = 0.4
-n = 1000
+n = 100
 G = ER_graph(n,p)
 C = cluster_coeff(G)
-print(f'Cluster coefficient: {C}\n Deviation from theory {C-p-1/np.sqrt(n)}')
+
 
