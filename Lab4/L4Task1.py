@@ -58,4 +58,8 @@ for cluster in clusters:
         edgesum += sum(row)
 
     mod_g += edgesum/m - edgesum**2/(4*m**2)
+<<<<<<< HEAD
 print(f' Modularity of partition: {mod_g}')
+=======
+print(f' Modularity of partition: {mod_g}')
+>>>>>>> d70fa013154909847b8599aeddce02921b7bf23e

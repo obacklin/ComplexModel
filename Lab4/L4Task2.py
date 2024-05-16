@@ -52,5 +52,5 @@ def prop_connected(steps):
 #tSTART = time.perf_counter()
 #prop_connected(100)
 #tSTOP = time.perf_counter()
-#rint(f'Time: {round(tSTOP-tSTART,2)}')
+#print(f'Time: {round(tSTOP-tSTART,2)} seconds')
 

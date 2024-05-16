@@ -9,24 +9,48 @@ class Particle:
         self.x_vel = x_vel
         self.y_vel = y_vel
         self.angle = self.calc_angle()
+<<<<<<< HEAD
         self.rad1 = 10
         self.rad2 = 20
         self.rad3 = 100
+=======
+        self.rad1 = 5
+        self.rad2 = 20 
+        self.rad3 = 30
+>>>>>>> 4f704be7c0f59e65af0e6e8193793f18f12d2fa2
         
     def calc_angle(self):
         np.arccos(self.x_vel/np.sqrt(self.x_vel**2 + self.y_vel**2))
 
     def update(self, delta_t):
+<<<<<<< HEAD
         rho1 = 0.6
         rho2 = 0.2
         rho3 = 0.3
         rho4 = 0.1
         self.x_pos += self.x_vel*delta_t
         self.y_pos += self.y_vel*delta_t
+=======
+        rho1 = 0
+        rho2 = 1
+        rho3 = 0
+        rho4 = 0
+        alpha = 0.8
+        beta = 0.2
+        self.x_pos += alpha*self.x_vel*delta_t + beta*self.brownian_motion(delta_t)[0]
+        self.y_pos += self.y_vel*delta_t + beta*self.brownian_motion(delta_t)[1]
+>>>>>>> 4f704be7c0f59e65af0e6e8193793f18f12d2fa2
         self.x_vel = rho1*self.repell_vec()[0] + rho2*self.align_vec(self.align)[0] + rho3*self.attract_vec(self.attract)[0]  + rho4*self.x_vel
         self.y_vel = rho1*self.repell_vec()[1] + rho2*self.align_vec(self.align)[1] + rho3*self.attract_vec(self.attract)[1] + rho4*self.y_vel
-        
-        
+    
+    def brownian_motion(self,delta_t):
+        c = 3
+        r_max = 10
+        a = 1/(1-np.e**(-r_max**2/(2*c**4*delta_t**2)))
+        u = random.uniform(0,1)
+        R = np.sqrt(-2*c**4*delta_t**2*np.log((a-u)/a))
+        theta = random.uniform(0,2*np.pi)
+        return(R*np.cos(theta),R*np.sin(theta))
     def influence(self, particles):
 
         self.repell = [] # Zone 1
@@ -79,7 +103,7 @@ class Particle:
             p_sin += np.sin(theta)
             p_cos += np.cos(theta)
         
-        p_measure = np.sqrt(p_sin**2 + p_cos**2)/len(parts)
+        p_measure = np.sqrt(p_sin**2 + p_cos**2)/len(angles)
 
         newangle = np.arctan(np.sum([np.sin(angle) for angle in angles]/np.sum([np.cos(angle) for angle in angles]))) + random.uniform(-np.pi/6,np.pi/6)
         return (p_measure*np.cos(newangle),p_measure*np.sin(newangle))
@@ -117,10 +141,17 @@ class Simulation:
     def animate(self):
         anim = animation.FuncAnimation(self.fig,self.update,frames=self.steps,init_func=self.initial_animation, blit=True)
         plt.show()
+
 if __name__ == "__main__":
+<<<<<<< HEAD
     x=[random.uniform(-1,1) for _ in range(100)]
     particles = [Particle(np.random.uniform(-100,100), np.random.uniform(-100,100), x[i], (random.randint(0,1)-1/2)*2*np.sqrt(1-x[i]**2)) for i in range(100)]
     print([p.x_vel**2 + p.y_vel**2 for p in particles])
+=======
+    nr_particles = 100
+    x=[random.uniform(-1,1) for _ in range(nr_particles)]
+    particles = [Particle(np.random.uniform(-30,30), np.random.uniform(-30,30), x[i], (random.randint(0,1)-1/2)*2*np.sqrt(1-x[i]**2)) for i in range(nr_particles)]
+ 
+>>>>>>> 4f704be7c0f59e65af0e6e8193793f18f12d2fa2
     simulation = Simulation(50,particles)
     simulation.animate()
-    print([p.x_vel**2 + p.y_vel**2 for p in particles])
