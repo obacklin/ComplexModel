@@ -10,16 +10,16 @@ class Particle:
         self.y_vel = y_vel
         self.angle = self.calc_angle()
         self.rad1 = 10
-        self.rad2 = 20 
-        self.rad3 = 30
+        self.rad2 = 20
+        self.rad3 = 100
         
     def calc_angle(self):
         np.arccos(self.x_vel/np.sqrt(self.x_vel**2 + self.y_vel**2))
 
     def update(self, delta_t):
-        rho1 = 0.5
+        rho1 = 0.6
         rho2 = 0.2
-        rho3 = 0.2
+        rho3 = 0.3
         rho4 = 0.1
         self.x_pos += self.x_vel*delta_t
         self.y_pos += self.y_vel*delta_t
@@ -119,7 +119,7 @@ class Simulation:
         plt.show()
 if __name__ == "__main__":
     x=[random.uniform(-1,1) for _ in range(100)]
-    particles = [Particle(np.random.uniform(-30,30), np.random.uniform(-30,30), x[i], (random.randint(0,1)-1/2)*2*np.sqrt(1-x[i]**2)) for i in range(100)]
+    particles = [Particle(np.random.uniform(-100,100), np.random.uniform(-100,100), x[i], (random.randint(0,1)-1/2)*2*np.sqrt(1-x[i]**2)) for i in range(100)]
     print([p.x_vel**2 + p.y_vel**2 for p in particles])
     simulation = Simulation(50,particles)
     simulation.animate()
