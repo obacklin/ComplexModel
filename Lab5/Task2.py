@@ -3,7 +3,7 @@ import random
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 class Particle:
-    def __init__(self,x,y, x_vel, y_vel) -> None:
+    def __init__(self,x,y, x_vel, y_vel,beta) -> None:
         self.x_pos = x
         self.y_pos = y
         self.x_vel = x_vel
@@ -12,24 +12,23 @@ class Particle:
         self.rad1 = 10
         self.rad2 = 20
         self.rad3 = 100
+        self.beta = beta
         
     def calc_angle(self):
         np.arccos(self.x_vel/np.sqrt(self.x_vel**2 + self.y_vel**2))
 
     def update(self, delta_t):
-        rho1 = 0.6
-        rho2 = 0.2
-        rho3 = 0.3
-        rho4 = 0.1
-        alpha = 0
-        beta = 0
-        self.x_pos += alpha*self.x_vel*delta_t + beta*self.brownian_motion(delta_t)[0]
-        self.y_pos += alpha*self.y_vel*delta_t + beta*self.brownian_motion(delta_t)[1]
-        self.x_vel = rho1*self.repell_vec()[0] + rho2*self.align_vec(self.align)[0] + rho3*self.attract_vec(self.attract)[0]  + rho4*self.x_vel
-        self.y_vel = rho1*self.repell_vec()[1] + rho2*self.align_vec(self.align)[1] + rho3*self.attract_vec(self.attract)[1] + rho4*self.y_vel
+        rho1 = 0
+        rho2 = 1
+        rho3 = 0
+        rho4 = 0
+        self.x_pos += self.x_vel*delta_t
+        self.y_pos += self.y_vel*delta_t 
+        self.x_vel = (1-self.beta)*(rho1*self.repell_vec()[0] + rho2*self.align_vec(self.align)[0] + rho3*self.attract_vec(self.attract)[0]  + rho4*self.x_vel) +self.beta*self.brownian_motion(delta_t)[0]
+        self.y_vel = (1-self.beta)*(rho1*self.repell_vec()[1] + rho2*self.align_vec(self.align)[1] + rho3*self.attract_vec(self.attract)[1] + rho4*self.y_vel) + self.beta*self.brownian_motion(delta_t)[1]
     
     def brownian_motion(self,delta_t):
-        c = 3
+        c = 0.5
         r_max = 10
         a = 1/(1-np.e**(-r_max**2/(2*c**4*delta_t**2)))
         u = random.uniform(0,1)
@@ -91,7 +90,7 @@ class Particle:
         p_measure = np.sqrt(p_sin**2 + p_cos**2)/len(angles)
 
         newangle = np.arctan(np.sum([np.sin(angle) for angle in angles]/np.sum([np.cos(angle) for angle in angles]))) + random.uniform(-np.pi/6,np.pi/6)
-        return (p_measure*np.cos(newangle),p_measure*np.sin(newangle))
+        return (np.cos(newangle),np.sin(newangle))
 
     def attract_vec(self, parts):
         center=self.center_of_mass(parts)
@@ -102,34 +101,70 @@ class Particle:
         else:
             vec = (-e_1[0]/np.sqrt(e_1[0]**2+e_1[1]**2),-e_1[1]/np.sqrt(e_1[0]**2+e_1[1]**2))
         return vec
-   
+    
         
 class Simulation:
-    def __init__(self,steps,particles):
-        self.steps = steps
+    def __init__(self,particles):
+
         self.particles = particles
-        self.fig, self.ax =plt.subplots()
-        self.ax.set_xlim(-100, 100)
-        self.ax.set_ylim(-100, 100)
-        self.scatter = self.ax.scatter([],[])
-    def initial_animation(self):
-        self.scatter.set_offsets([0,0])
-        return self.scatter,
+
     
     def update(self,frame):
         for p in self.particles:
             p.influence(self.particles)
             p.update(1)
-        self.scatter.set_offsets([[p.x_pos,p.y_pos] for p in self.particles])
-        return self.scatter,
-        
-    def animate(self):
-        anim = animation.FuncAnimation(self.fig,self.update,frames=self.steps,init_func=self.initial_animation, blit=True)
-        plt.show()
+
+def beta_plot():
+    scatter =[]
+    betas = []
+    for r in range(30):
+        beta = r/30
+        nr_particles = 100
+        x=[random.uniform(-1,1) for _ in range(nr_particles)]
+        particles = [Particle(np.random.uniform(-2.5,2.5), np.random.uniform(-2.5,2.5), x[i], (random.randint(0,1)-1/2)*2*np.sqrt(1-x[i]**2),beta) for i in range(nr_particles)]
+        tstop = 20
+        simulation = Simulation(particles)
+        V_lst = []
+        for t in range(tstop):
+            vsum = (0,0)
+            for p in particles:
+                vsum = (vsum[0]+p.x_vel, vsum[1]+p.y_vel)
+            V_t = np.sqrt(vsum[0]**2 +vsum[1]**2)/nr_particles
+            V_lst.append(V_t)
+            simulation.update(0)
+        scatter.append(np.mean(V_lst))
+        betas.append(beta)
+    fig, ax = plt.subplots()
+    ax.set_ylim(0,1)
+    ax.scatter(betas,scatter)
+    plt.show()
+
+def density_plot():
+    scatter =[]
+    densities = []
+    for r in range(1,30):
+        beta = 0
+        nr_particles = 8*r
+        density = nr_particles/25
+        x=[random.uniform(-1,1) for _ in range(nr_particles)]
+        particles = [Particle(np.random.uniform(-2.5,2.5), np.random.uniform(-2.5,2.5), x[i], (random.randint(0,1)-1/2)*2*np.sqrt(1-x[i]**2),beta) for i in range(nr_particles)]
+        tstop = 10
+        simulation = Simulation(particles)
+        V_lst = []
+        for t in range(tstop):
+            vsum = (0,0)
+            for p in particles:
+                vsum = (vsum[0]+p.x_vel, vsum[1]+p.y_vel)
+                  
+            V_t = np.sqrt(vsum[0]**2 +vsum[1]**2)/nr_particles
+            V_lst.append(V_t)
+            simulation.update(0)
+        scatter.append(np.mean(V_lst))
+        densities.append(density)
+    fig, ax = plt.subplots()
+    ax.set_ylim(0,1)
+    ax.scatter(densities,scatter)
+    plt.show()
 
 if __name__ == "__main__":
-    x=[random.uniform(-1,1) for _ in range(100)]
-    particles = [Particle(np.random.uniform(-100,100), np.random.uniform(-100,100), x[i], (random.randint(0,1)-1/2)*2*np.sqrt(1-x[i]**2)) for i in range(100)]
-    print([p.x_vel**2 + p.y_vel**2 for p in particles])
-    simulation = Simulation(50,particles)
-    simulation.animate()
+    beta_plot()
