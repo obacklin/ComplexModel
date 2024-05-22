@@ -9,7 +9,7 @@ class Particle:
         self.x_vel = x_vel
         self.y_vel = y_vel
         self.angle = self.calc_angle()
-        self.rad1 = 5
+        self.rad1 = 10
         self.rad2 = 20 
         self.rad3 = 30
         
@@ -17,12 +17,12 @@ class Particle:
         np.arccos(self.x_vel/np.sqrt(self.x_vel**2 + self.y_vel**2))
 
     def update(self, delta_t):
-        rho1 = 0
-        rho2 = 1
-        rho3 = 0
-        rho4 = 0
-        alpha = 0.8
-        beta = 0.2
+        rho1 = 0.2
+        rho2 = 0.3
+        rho3 = 0.3
+        rho4 = 0.2
+        alpha = 1
+        beta = 0.0
         self.x_pos += alpha*self.x_vel*delta_t + beta*self.brownian_motion(delta_t)[0]
         self.y_pos += self.y_vel*delta_t + beta*self.brownian_motion(delta_t)[1]
         self.x_vel = rho1*self.repell_vec()[0] + rho2*self.align_vec(self.align)[0] + rho3*self.attract_vec(self.attract)[0]  + rho4*self.x_vel
