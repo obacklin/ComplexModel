@@ -143,7 +143,7 @@ def density_plot():
     scatter =[]
     densities = []
     for r in range(1,30):
-        beta = 0
+        beta = 1
         nr_particles = 8*r
         density = nr_particles/25
         x=[random.uniform(-1,1) for _ in range(nr_particles)]
@@ -167,4 +167,4 @@ def density_plot():
     plt.show()
 
 if __name__ == "__main__":
-    beta_plot()
+    density_plot()
