@@ -61,7 +61,7 @@ def create_crossbreeds(croms, fitlist, newcroms):
 
 if __name__ == "__main__":
     # Select parameters
-    generations = 5
+    generations = 200
     nr_of_croms = 100
     crom_size = 54
     croms_culled = 10
@@ -93,6 +93,11 @@ if __name__ == "__main__":
     plt.xlabel("Generations")
     plt.ylabel("Average fitness")
     plt.show()
+    
+    # Find best crom and paint using it
+    top_crom = croms[np.argmax(fitlist)]
+    fitness, xpos, ypos = painter_play(top_crom, room)
+    # Do something with this
 
 
 
