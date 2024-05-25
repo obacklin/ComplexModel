@@ -2,6 +2,7 @@ from painter_play import *
 import numpy as np
 import random
 import matplotlib.pyplot as plt
+import tkinter as tk
 
 def paint(croms, room, fitlist):
     """Paints all croms desired nr of times and takes average fitness"""
@@ -61,7 +62,7 @@ def create_crossbreeds(croms, fitlist, newcroms):
 
 if __name__ == "__main__":
     # Select parameters
-    generations = 200
+    generations = 5
     nr_of_croms = 100
     crom_size = 54
     croms_culled = 10
@@ -69,7 +70,7 @@ if __name__ == "__main__":
     # Creates the various matrixes and arrays needed
     croms = np.random.randint(4, size=(nr_of_croms, crom_size))
     newcroms = np.zeros((croms_culled, crom_size))
-    room = np.zeros((30,60))
+    room = np.zeros((60,30))
     fitlist = np.zeros(croms.shape[0])
     avg_fitness = np.empty(generations + 1)
     
@@ -97,8 +98,50 @@ if __name__ == "__main__":
     # Find best crom and paint using it
     top_crom = croms[np.argmax(fitlist)]
     fitness, xpos, ypos = painter_play(top_crom, room)
-    # Do something with this
+    
+    # Initializes tk for drawing
+    top = tk.Tk()
+    # Setup of sizes
+    square_size = 20
+    can_heigth = 600
+    can_width = 1200
+    # Setup canvas. Background is black to get black lines between squares
+    Canvas = tk.Canvas(top, bg="black", height=can_heigth, width=can_width)
 
+    # Gets which squares are painted and path
+    painted_squares = np.array([xpos, ypos])
+    painted_squares = np.transpose(painted_squares)
+    painted_squares += np.full((painted_squares.shape[0], painted_squares.shape[1]), -1) # Adjusts since painter_play matrix starts at (1, 1), not (0, 0)
+    
+    # Creates all unpainted squares
+    for xcoor in range(2, can_width, square_size):
+        for ycoor in range(2, can_heigth, square_size):
+            Canvas.create_rectangle(xcoor, ycoor, xcoor + square_size - 1, ycoor + square_size - 1, fill="white")
+
+    # Paints all painted squares. Must be done separately from the path or it will overwrite them
+    for square in painted_squares:
+        x, y = square[0]*square_size + 2, square[1]*square_size + 2
+        Canvas.create_rectangle(x, y, x + square_size - 1, y + square_size - 1, fill="grey") # For clarity we paint a fairly boring grey
+
+    # Start
+    x_old, y_old = painted_squares[0][0]*square_size + square_size/2 + 2, painted_squares[0][1]*square_size+ square_size/2 + 2
+
+    # Traces the path
+    for square in painted_squares[1:]:
+        x, y = square[0]*square_size + square_size/2 + 2, square[1]*square_size + square_size/2 + 2
+        Canvas.create_line(x_old, y_old, x, y, fill="orange", width=2, arrow=tk.LAST)
+        x_old = x
+        y_old = y
+
+    # Creates circles at start and finish
+    x, y = painted_squares[0]
+    x, y = x*square_size + square_size/2 + 2, y*square_size+ square_size/2 + 2
+    r = 5
+    Canvas.create_oval(x-r, y-r, x + r, y + r, fill="green")
+    Canvas.create_oval(x_old-r, y_old-r, x_old + r, y_old + r, fill="red")
+
+    Canvas.pack()
+    top.mainloop()
 
 
 
