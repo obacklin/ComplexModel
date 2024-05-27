@@ -1,7 +1,7 @@
 import numpy as np
 import random
 
-def play(choices):
+def prisoners_dillema(choices):
     if choices[0] == 0 and choices[1] == 0:
         return [1, 1]
     elif choices[0] == 1 and choices[1] == 0:
@@ -10,6 +10,7 @@ def play(choices):
         return [5, 0]
     else:
         return [3, 3]
+    
 
 def fitness_scaling(fitlist):
     minimum = np.min(fitlist)
@@ -70,4 +71,9 @@ def create_crossbreeds(croms, fitlist, newcroms):
 
 if __name__ == "__main__":
     generations = 200
+    crom_size = 70
+    nr_of_croms = 100
+    croms = croms = np.random.randint(2, size=(nr_of_croms, crom_size))
+    newcroms = np.empty((nr_of_croms, crom_size))
 
+    for i in range(generations):
