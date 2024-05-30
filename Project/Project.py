@@ -17,10 +17,10 @@ def fitness_scaling(fitlist):
     average = np.average(fitlist)
 
     a = average*average/(average-minimum)
-    b = (-1)*minimum*(average)/(average-minimum)
+    b = minimum*(average)/(average-minimum)
 
     for i, fitness in enumerate(fitlist):
-        fitlist[i] = a*fitness + b
+        fitlist[i] = a*fitness - b
 
 def crossbreed(crom1, crom2):
     """Crossbreads two croms by taking a random cutoff point"""
