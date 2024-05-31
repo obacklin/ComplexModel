@@ -1,7 +1,7 @@
 import numpy as np
 import random
 
-def prisoners_dillema(choices):
+def prisoners_dilemma(choices):
     if choices[0] == 0 and choices[1] == 0:
         return [1, 1]
     elif choices[0] == 1 and choices[1] == 0:
@@ -68,12 +68,54 @@ def create_crossbreeds(croms, fitlist, newcroms):
             crom2 = choose_crom(croms, probability_list)
 
         newcroms[i:i+2] = crossbreed(crom1, crom2)
+def hist_to_num(hist):
+    bin_str = ''.join(f'{a}{b}' for a , b, in hist)
+    bin_num = int(bin_str,2)
+    num = int(bin_num)
+    return(num)
 
+def pd_play(rounds, crom1 ,crom2):
+    memory_1 = [] 
+    memory_2 = []
+    pointcount = [0,0]
+    hist= [crom1[0],crom2[0]]
+    res = prisoners_dilemma(hist)
+    pointcount[0] += res[0]
+    pointcount[1] += res[1]
+    memory_1.append(hist)
+    hist.reverse()
+    memory_2.append(hist)
+    
+    add = 1
+    for i in range(1,5):
+        hist=[crom1[hist_to_num(memory_1)+ add],crom2[hist_to_num(memory_2)+ add]]
+        res = prisoners_dilemma(hist)
+        pointcount[0] += res[0]
+        pointcount[1] += res[1]
+        memory_1.append(hist)
+        hist.reverse()
+        memory_2.append(hist)
+        add += 2**(2*i)
+    for i in range(rounds-5): 
+        hist=[crom1[hist_to_num(memory_1)+ add],crom2[hist_to_num(memory_2)+add]]
+        res = prisoners_dilemma(hist)
+        pointcount[0] += res[0]
+        pointcount[1] += res[1]
+        memory_1.pop(0)
+        memory_2.pop(0)
+        memory_1.append(hist)
+        hist.reverse()
+        memory_2.append(hist)
+    return pointcount
+
+
+            
+            
 if __name__ == "__main__":
     generations = 200
-    crom_size = 70
-    nr_of_croms = 100
-    croms = croms = np.random.randint(2, size=(nr_of_croms, crom_size))
-    newcroms = np.empty((nr_of_croms, crom_size))
+    add = 1 + 4 +  16 + 64 + 256
+    crom_size = 1024+add
+    nr_of_croms = 2
 
-    for i in range(generations):
+    croms = np.random.randint(2, size=(nr_of_croms, crom_size))
+    print(pd_play(20,croms[0,:],croms[1,:]))
