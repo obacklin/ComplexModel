@@ -149,5 +149,18 @@ if __name__ == "__main__":
 
 
 
+def in_triangle(point):
+    if point[0] < 1/2 and point[1] <= np.sqrt(3)*point[0]:
+        return True
+    elif point[0] >= 1/2 and point[1] <= np.sqrt(3) - np.sqrt(3)*point[0]: 
+        return True
+    else:
+        return False
+x_start = random.uniform(0,1)
+y_start = random.uniform(0,1)
 
+while not in_triangle([x_start,y_start]):
+    x_start = random.uniform(0,1)
+    y_start = random.uniform(0,1)
 
+    
