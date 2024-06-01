@@ -3,13 +3,13 @@ import random
 import matplotlib.pyplot as plt
 def prisoners_dilemma(choices):
     if choices[0] == 0 and choices[1] == 0:
-        return [1, 1]
+        return np.array([1, 1])
     elif choices[0] == 1 and choices[1] == 0:
-        return [0, 5]
+        return np.array([0, 5])
     elif choices[0] == 0 and choices[1] == 1:
-        return [5, 0]
+        return np.array([5, 0])
     else:
-        return [3, 3]
+        return np.array([3, 3])
     
 
 def fitness_scaling(fitlist):
@@ -88,13 +88,12 @@ def hist_to_num(hist):
     return(num)
 
 def pd_play(rounds, crom1 ,crom2):
-    memory_1 = [] 
+    memory_1 = []
     memory_2 = []
-    pointcount = [0,0]
+    pointcount = np.array([0,0])
     hist= [crom1[0],crom2[0]]
     res = prisoners_dilemma(hist)
-    pointcount[0] += res[0]
-    pointcount[1] += res[1]
+    pointcount += res
     memory_1.append(hist)
     hist.reverse()
     memory_2.append(hist)
@@ -103,17 +102,16 @@ def pd_play(rounds, crom1 ,crom2):
     for i in range(1,5):
         hist=[crom1[hist_to_num(memory_1)+ add],crom2[hist_to_num(memory_2)+ add]]
         res = prisoners_dilemma(hist)
-        pointcount[0] += res[0]
-        pointcount[1] += res[1]
+        pointcount += res
         memory_1.append(hist)
         hist.reverse()
         memory_2.append(hist)
         add += 2**(2*i)
+
     for i in range(rounds-5): 
         hist=[crom1[hist_to_num(memory_1)+ add],crom2[hist_to_num(memory_2)+add]]
         res = prisoners_dilemma(hist)
-        pointcount[0] += res[0]
-        pointcount[1] += res[1]
+        pointcount += res
         memory_1.pop(0)
         memory_2.pop(0)
         memory_1.append(hist)
@@ -131,6 +129,7 @@ if __name__ == "__main__":
     nr_of_croms = 100
     croms_culled = 10
     avg_fitness = np.empty(generations)
+    top_fitness = np.empty(generations)
     std_dev = np.empty(generations)
     median = np.empty(generations)
     newcroms = np.zeros((croms_culled, crom_size))
@@ -145,7 +144,9 @@ if __name__ == "__main__":
                     points = pd_play(20,croms[i,:],croms[j,:])
                     fitlist[i] += points[0]
                     fitlist[j] += points[1]
+
         avg_fitness[g] = np.average(fitlist)
+        top_fitness[g] = np.max(fitlist)
         std_dev[g] = np.std(fitlist)
         median[g] = np.median(fitlist)
         if g == 99:
@@ -159,24 +160,30 @@ if __name__ == "__main__":
     
 
     x = np.linspace(0, generations, generations)
-    fig, ax = plt.subplots()
+    fig, ax1 = plt.subplots()
     fig, ax2 = plt.subplots()
     fig, ax3 = plt.subplots()
-    ax.plot(x, avg_fitness)
-    ax2.plot(x, std_dev)
-    ax3.plot(x, median)
+    fig, ax4 = plt.subplots()
+    ax1.plot(x, avg_fitness)
+    ax2.plot(x, top_fitness)
+    ax3.plot(x, std_dev)
+    ax4.plot(x, median)
 
-    ax.set_title(f"Average result over {generations} generations")
-    ax.set_xlabel("Generations")
-    ax.set_ylabel("Average result")
-    
-    ax2.set_title(f"Average standard deviation over {generations} generations")
+    ax1.set_title(f"Average result over {generations} generations")
+    ax1.set_xlabel("Generations")
+    ax1.set_ylabel("Average result")
+
+    ax2.set_title(f"Highest result over {generations} generations")
     ax2.set_xlabel("Generations")
-    ax2.set_ylabel("Standard Deviation")
-
-    ax3.set_title(f"Average median over {generations} generations")
+    ax2.set_ylabel("Highest result")
+    
+    ax3.set_title(f"Average standard deviation over {generations} generations")
     ax3.set_xlabel("Generations")
-    ax3.set_ylabel("Median")
+    ax3.set_ylabel("Standard Deviation")
+
+    ax4.set_title(f"Average median over {generations} generations")
+    ax4.set_xlabel("Generations")
+    ax4.set_ylabel("Median")
     plt.show()
                 
                 
