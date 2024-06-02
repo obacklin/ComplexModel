@@ -168,3 +168,4 @@ def density_plot():
 
 if __name__ == "__main__":
     beta_plot()
+    #density_plot()
