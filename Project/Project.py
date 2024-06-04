@@ -146,13 +146,19 @@ if __name__ == "__main__":
     
     croms = np.random.randint(2, size=(nr_of_croms, crom_size))
 
-    nr_of_opponents = 200
+    against = "random"
+    if against == "group":
+        play = play_against_group
+        nr_of_opponents = croms.shape[0]
+    else:
+        play = play_against_random
+        nr_of_opponents = 200
 
     for g in range(generations):
         print(f"Generation: {g}")
         fitlist= np.zeros([croms.shape[0]])
 
-        play_against_random(croms, fitlist, nr_of_opponents, rounds)
+        play(croms, fitlist, nr_of_opponents, rounds)
 
         fitlist /= nr_of_opponents*rounds
         avg_fitness[g] = np.average(fitlist)
