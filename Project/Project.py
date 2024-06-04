@@ -101,8 +101,7 @@ def pd_play(rounds, crom1 ,crom2):
     add = 1
     for i in range(1,5):
         hist=[crom1[hist_to_num(memory_1)+ add],crom2[hist_to_num(memory_2)+ add]]
-        res = prisoners_dilemma(hist)
-        pointcount += res
+        pointcount += prisoners_dilemma(hist)
         memory_1.append(hist)
         hist.reverse()
         memory_2.append(hist)
@@ -110,8 +109,7 @@ def pd_play(rounds, crom1 ,crom2):
 
     for i in range(rounds-5): 
         hist=[crom1[hist_to_num(memory_1)+ add],crom2[hist_to_num(memory_2)+add]]
-        res = prisoners_dilemma(hist)
-        pointcount += res
+        pointcount += prisoners_dilemma(hist)
         memory_1.pop(0)
         memory_2.pop(0)
         memory_1.append(hist)
@@ -135,21 +133,28 @@ if __name__ == "__main__":
     newcroms = np.zeros((croms_culled, crom_size))
     
     croms = np.random.randint(2, size=(nr_of_croms, crom_size))
+    start_croms = np.copy(croms)
     for g in range(generations):
         print(f"Generation: {g}")
         fitlist= np.zeros([croms.shape[0]])
         for i in range(nr_of_croms):
-            for j in range(nr_of_croms):
-                if i <= j:
-                    points = pd_play(20,croms[i,:],croms[j,:])
-                    fitlist[i] += points[0]
-                    fitlist[j] += points[1]
+            for j in range(i, nr_of_croms):
+                points = pd_play(20,croms[i],croms[j])
+                fitlist[i] += points[0]
+                fitlist[j] += points[1]
+
+        fitness_scaling(fitlist)
+
+        top_crom_id = np.argmax(fitlist)
+        points = 0
+        for i in range(nr_of_croms):
+            points += pd_play(20, croms[top_crom_id], start_croms[i])[0]
 
         avg_fitness[g] = np.average(fitlist)
-        top_fitness[g] = np.max(fitlist)
+        top_fitness[g] = points
         std_dev[g] = np.std(fitlist)
         median[g] = np.median(fitlist)
-        if g == 99:
+        if g == generations - 1:
             print(fitlist)
         #fitness_scaling(fitlist)
         create_crossbreeds(croms, fitlist, newcroms)
