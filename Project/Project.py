@@ -117,11 +117,22 @@ def pd_play(rounds, crom1 ,crom2):
         memory_2.append(hist)
     return pointcount
 
+def play_against_group(croms, fitlist, nr_opponents, rounds):
+    for i in range(croms.shape[0]):
+            for j in range(i, nr_opponents):
+                points = pd_play(rounds,croms[i],croms[j])
+                fitlist[i] += points[0]
+                fitlist[j] += points[1]
 
-            
+def play_against_random(croms, fitlist, nr_opponents, rounds):
+    opponents = np.random.randint(2, size=(nr_opponents, crom_size))
+    for i in range(croms.shape[0]):
+            for j in range(nr_opponents):
+                points = pd_play(rounds,croms[i],opponents[j])
+                fitlist[i] += points[0]
             
 if __name__ == "__main__":
-    generations = 100
+    generations = 200
     add = 1 + 4 +  16 + 64 + 256
     crom_size = 1024+add
     nr_of_croms = 100
@@ -135,16 +146,15 @@ if __name__ == "__main__":
     
     croms = np.random.randint(2, size=(nr_of_croms, crom_size))
 
+    nr_of_opponents = 200
+
     for g in range(generations):
         print(f"Generation: {g}")
         fitlist= np.zeros([croms.shape[0]])
-        for i in range(nr_of_croms):
-            for j in range(i, nr_of_croms):
-                points = pd_play(rounds,croms[i],croms[j])
-                fitlist[i] += points[0]
-                fitlist[j] += points[1]
 
-        fitlist /= nr_of_croms*rounds
+        play_against_random(croms, fitlist, nr_of_opponents, rounds)
+
+        fitlist /= nr_of_opponents*rounds
         avg_fitness[g] = np.average(fitlist)
         top_fitness[g] = np.max(fitlist)
         std_dev[g] = np.std(fitlist)
@@ -152,7 +162,7 @@ if __name__ == "__main__":
         if g == generations - 1:
             print(fitlist)
 
-        #fitness_scaling(fitlist)
+        fitness_scaling(fitlist)
         create_crossbreeds(croms, fitlist, newcroms)
         replace(croms, newcroms, fitlist)
         mutation(croms)
