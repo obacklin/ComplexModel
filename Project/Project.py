@@ -126,6 +126,7 @@ if __name__ == "__main__":
     crom_size = 1024+add
     nr_of_croms = 100
     croms_culled = 10
+    rounds = 20
     avg_fitness = np.empty(generations)
     top_fitness = np.empty(generations)
     std_dev = np.empty(generations)
@@ -133,28 +134,24 @@ if __name__ == "__main__":
     newcroms = np.zeros((croms_culled, crom_size))
     
     croms = np.random.randint(2, size=(nr_of_croms, crom_size))
-    start_croms = np.copy(croms)
+
     for g in range(generations):
         print(f"Generation: {g}")
         fitlist= np.zeros([croms.shape[0]])
         for i in range(nr_of_croms):
             for j in range(i, nr_of_croms):
-                points = pd_play(20,croms[i],croms[j])
+                points = pd_play(rounds,croms[i],croms[j])
                 fitlist[i] += points[0]
                 fitlist[j] += points[1]
 
-        top_crom_id = np.argmax(fitlist)
-        points = 0
-        for i in range(nr_of_croms):
-            points += pd_play(20, croms[top_crom_id], start_croms[i])[0]
-
+        fitlist /= nr_of_croms*rounds
         avg_fitness[g] = np.average(fitlist)
-        top_fitness[g] = points
+        top_fitness[g] = np.max(fitlist)
         std_dev[g] = np.std(fitlist)
         median[g] = np.median(fitlist)
         if g == generations - 1:
             print(fitlist)
-            
+
         #fitness_scaling(fitlist)
         create_crossbreeds(croms, fitlist, newcroms)
         replace(croms, newcroms, fitlist)
