@@ -143,8 +143,6 @@ if __name__ == "__main__":
                 fitlist[i] += points[0]
                 fitlist[j] += points[1]
 
-        fitness_scaling(fitlist)
-
         top_crom_id = np.argmax(fitlist)
         points = 0
         for i in range(nr_of_croms):
@@ -156,6 +154,7 @@ if __name__ == "__main__":
         median[g] = np.median(fitlist)
         if g == generations - 1:
             print(fitlist)
+            
         #fitness_scaling(fitlist)
         create_crossbreeds(croms, fitlist, newcroms)
         replace(croms, newcroms, fitlist)
