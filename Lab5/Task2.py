@@ -167,4 +167,9 @@ def density_plot():
     plt.show()
 
 if __name__ == "__main__":
+<<<<<<< HEAD
+    beta_plot()
+    #density_plot()
+=======
     density_plot()
+>>>>>>> 85e0c25fb98f0a10637fa29ff9f2d22af9e1a8c5
