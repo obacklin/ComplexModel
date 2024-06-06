@@ -15,11 +15,11 @@ def prisoners_dilemma(choices):
 
 def fitness_scaling(fitlist):
     """Scales the fitness as per the article"""
-    minimum = np.min(fitlist)
+    maximum = np.max(fitlist)
     average = np.average(fitlist)
 
-    a = average/(average-minimum)
-    b = minimum*(average)/(average-minimum)
+    a = average/(maximum - average)
+    b = average*(average - 2*average)/(maximum-average)
 
     for i, fitness in enumerate(fitlist):
         fitlist[i] = a*fitness - b
@@ -156,13 +156,15 @@ if __name__ == "__main__":
     croms = np.random.randint(2, size=(nr_of_croms, crom_size))
     prob_c_after_d = np.empty(generations)
 
-    against = "random" # Select who you want croms to play against
+    against = "group" # Select who you want croms to play against
     if against == "group":
         play = play_against_group
         nr_of_opponents = croms.shape[0]
+        for_graph = "against each other"
     else:
         play = play_against_random
         nr_of_opponents = 100
+        for_graph = "against random opponents"
 
     for g in range(generations):
         print(f"Generation: {g}") # To keep track of how far along it's gotten
@@ -207,15 +209,15 @@ if __name__ == "__main__":
     ax1.set_xlabel("Generations")
     ax1.set_ylabel("Average result")
 
-    ax2.set_title(f"Probability of cooperating while enemy defected last 5 times\nover {generations} generations playing against random opponents")
+    ax2.set_title(f"Probability of cooperating while enemy defected last 5 times\nover {generations} generations playing against " + for_graph)
     ax2.set_xlabel("Generations")
     ax2.set_ylabel("Probability")
     
-    ax3.set_title(f"Average standard deviation over {generations} generations\nplaying against random opponents")
+    ax3.set_title(f"Average standard deviation over {generations} generations\nplaying against " + for_graph)
     ax3.set_xlabel("Generations")
     ax3.set_ylabel("Standard Deviation")
 
-    ax4.set_title(f"Average median over {generations} generations\nplaying against random opponents")
+    ax4.set_title(f"Average median over {generations} generations\nplaying against " + for_graph)
     ax4.set_xlabel("Generations")
     ax4.set_ylabel("Median")
     plt.show()
