@@ -15,11 +15,11 @@ def prisoners_dilemma(choices):
 
 def fitness_scaling(fitlist):
     """Scales the fitness as per the article"""
-    maximum = np.max(fitlist)
+    minimum = np.min(fitlist)
     average = np.average(fitlist)
 
-    a = average/(maximum - average)
-    b = average*(average - 2*average)/(maximum-average)
+    a = average/(average - minimum)
+    b = (-1)*average*average/(average-minimum)
 
     for i, fitness in enumerate(fitlist):
         fitlist[i] = a*fitness - b
