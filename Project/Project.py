@@ -137,14 +137,14 @@ if __name__ == "__main__":
     crom_size = 1024+add
     nr_of_croms = 100
     croms_culled = 10
-    rounds = 20
+    rounds = 100
     avg_fitness = np.empty(generations)
-    top_fitness = np.empty(generations)
     std_dev = np.empty(generations)
     median = np.empty(generations)
     newcroms = np.zeros((croms_culled, crom_size))
     
     croms = np.random.randint(2, size=(nr_of_croms, crom_size))
+    prob_c_after_d = np.empty(generations)
 
     against = "random"
     if against == "group":
@@ -152,7 +152,7 @@ if __name__ == "__main__":
         nr_of_opponents = croms.shape[0]
     else:
         play = play_against_random
-        nr_of_opponents = 200
+        nr_of_opponents = 100
 
     for g in range(generations):
         print(f"Generation: {g}")
@@ -162,7 +162,14 @@ if __name__ == "__main__":
 
         fitlist /= nr_of_opponents*rounds
         avg_fitness[g] = np.average(fitlist)
-        top_fitness[g] = np.max(fitlist)
+        count = 0
+        count2 = 0
+        for crom in croms:
+            for i in range(len(crom)):
+                if i > add and (i-add) % 2 < 1 and (i -add) % 8 < 4 and (i-add) % 32 < 16 and (i-add) % 128<64 and (i-add) % 512 < 256:
+                    count +=1
+                    count2 += crom[i]
+        prob_c_after_d[g]= count2/count
         std_dev[g] = np.std(fitlist)
         median[g] = np.median(fitlist)
         if g == generations - 1:
@@ -174,7 +181,6 @@ if __name__ == "__main__":
         mutation(croms)
 
 
-    
 
     x = np.linspace(0, generations, generations)
     fig, ax1 = plt.subplots()
@@ -182,23 +188,23 @@ if __name__ == "__main__":
     fig, ax3 = plt.subplots()
     fig, ax4 = plt.subplots()
     ax1.plot(x, avg_fitness)
-    ax2.plot(x, top_fitness)
+    ax2.plot(x, prob_c_after_d)
     ax3.plot(x, std_dev)
     ax4.plot(x, median)
 
-    ax1.set_title(f"Average result over {generations} generations")
+    ax1.set_title(f"Average result over {generations} generations\nplaying against random opponents")
     ax1.set_xlabel("Generations")
     ax1.set_ylabel("Average result")
 
-    ax2.set_title(f"Highest result over {generations} generations")
+    ax2.set_title(f"Probability of cooperating while enemy defected last 5 times\nover {generations} generations playing against random opponents")
     ax2.set_xlabel("Generations")
-    ax2.set_ylabel("Highest result")
+    ax2.set_ylabel("Probability")
     
-    ax3.set_title(f"Average standard deviation over {generations} generations")
+    ax3.set_title(f"Average standard deviation over {generations} generations\nplaying against random opponents")
     ax3.set_xlabel("Generations")
     ax3.set_ylabel("Standard Deviation")
 
-    ax4.set_title(f"Average median over {generations} generations")
+    ax4.set_title(f"Average median over {generations} generations\nplaying against random opponents")
     ax4.set_xlabel("Generations")
     ax4.set_ylabel("Median")
     plt.show()
