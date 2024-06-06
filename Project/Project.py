@@ -2,6 +2,7 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 def prisoners_dilemma(choices):
+    """Takes choices for prisoners dilemma and gives results"""
     if choices[0] == 0 and choices[1] == 0:
         return np.array([1, 1])
     elif choices[0] == 1 and choices[1] == 0:
@@ -13,6 +14,7 @@ def prisoners_dilemma(choices):
     
 
 def fitness_scaling(fitlist):
+    """Scales the fitness as per the article"""
     minimum = np.min(fitlist)
     average = np.average(fitlist)
 
@@ -82,23 +84,26 @@ def create_crossbreeds(croms, fitlist, newcroms):
         newcroms[i:i+2] = crossbreed(crom1, crom2)
 
 def hist_to_num(hist):
+    """Converts history to a choice"""
     bin_str = ''.join(f'{a}{b}' for a , b, in hist)
     bin_num = int(bin_str,2)
     num = int(bin_num)
     return(num)
 
 def pd_play(rounds, crom1 ,crom2):
+    """Plays a number of rounds between two croms"""
+    # Too keep track of memory
     memory_1 = []
     memory_2 = []
-    pointcount = np.array([0,0])
-    hist= [crom1[0],crom2[0]]
-    res = prisoners_dilemma(hist)
-    pointcount += res
-    memory_1.append(hist)
+    pointcount = np.array([0,0]) # Keeps track of points
+    hist= [crom1[0],crom2[0]] # Initial decisions
+    pointcount += prisoners_dilemma(hist) # Intial points
+    memory_1.append(hist) # First move remembered
     hist.reverse()
     memory_2.append(hist)
     
     add = 1
+    # Initial 5 rounds
     for i in range(1,5):
         hist=[crom1[hist_to_num(memory_1)+ add],crom2[hist_to_num(memory_2)+ add]]
         pointcount += prisoners_dilemma(hist)
@@ -107,6 +112,7 @@ def pd_play(rounds, crom1 ,crom2):
         memory_2.append(hist)
         add += 2**(2*i)
 
+    # Plays out the remaining rounds
     for i in range(rounds-5): 
         hist=[crom1[hist_to_num(memory_1)+ add],crom2[hist_to_num(memory_2)+add]]
         pointcount += prisoners_dilemma(hist)
@@ -118,6 +124,7 @@ def pd_play(rounds, crom1 ,crom2):
     return pointcount
 
 def play_against_group(croms, fitlist, nr_opponents, rounds):
+    """Croms play against each other"""
     for i in range(croms.shape[0]):
             for j in range(i, nr_opponents):
                 points = pd_play(rounds,croms[i],croms[j])
@@ -125,6 +132,7 @@ def play_against_group(croms, fitlist, nr_opponents, rounds):
                 fitlist[j] += points[1]
 
 def play_against_random(croms, fitlist, nr_opponents, rounds):
+    """Croms play against random opponents"""
     opponents = np.random.randint(2, size=(nr_opponents, crom_size))
     for i in range(croms.shape[0]):
             for j in range(nr_opponents):
@@ -132,12 +140,14 @@ def play_against_random(croms, fitlist, nr_opponents, rounds):
                 fitlist[i] += points[0]
             
 if __name__ == "__main__":
+    # Setup
     generations = 200
     add = 1 + 4 +  16 + 64 + 256
-    crom_size = 1024+add
+    crom_size = 1024+add # Total size of memory
     nr_of_croms = 100
     croms_culled = 10
     rounds = 100
+    # Keeps track of things
     avg_fitness = np.empty(generations)
     std_dev = np.empty(generations)
     median = np.empty(generations)
@@ -146,7 +156,7 @@ if __name__ == "__main__":
     croms = np.random.randint(2, size=(nr_of_croms, crom_size))
     prob_c_after_d = np.empty(generations)
 
-    against = "random"
+    against = "random" # Select who you want croms to play against
     if against == "group":
         play = play_against_group
         nr_of_opponents = croms.shape[0]
@@ -155,13 +165,14 @@ if __name__ == "__main__":
         nr_of_opponents = 100
 
     for g in range(generations):
-        print(f"Generation: {g}")
+        print(f"Generation: {g}") # To keep track of how far along it's gotten
         fitlist= np.zeros([croms.shape[0]])
 
         play(croms, fitlist, nr_of_opponents, rounds)
 
-        fitlist /= nr_of_opponents*rounds
+        fitlist /= nr_of_opponents*rounds # Scales to average result
         avg_fitness[g] = np.average(fitlist)
+        # Keeps track of probability to cooperate if opponent defects 5 previous times
         count = 0
         count2 = 0
         for crom in croms:
@@ -175,18 +186,18 @@ if __name__ == "__main__":
         if g == generations - 1:
             print(fitlist)
 
-        fitness_scaling(fitlist)
-        create_crossbreeds(croms, fitlist, newcroms)
-        replace(croms, newcroms, fitlist)
-        mutation(croms)
+        fitness_scaling(fitlist) # Rescales fitness
+        create_crossbreeds(croms, fitlist, newcroms) # Crossbreads
+        replace(croms, newcroms, fitlist) # Replaces with crossbreads
+        mutation(croms) # Mutates
 
 
-
+    # Plotting
     x = np.linspace(0, generations, generations)
-    fig, ax1 = plt.subplots()
-    fig, ax2 = plt.subplots()
-    fig, ax3 = plt.subplots()
-    fig, ax4 = plt.subplots()
+    fig, ax1 = plt.subplots() # Average result
+    fig, ax2 = plt.subplots() # Probability of cooperating when opponent has defected 5 times
+    fig, ax3 = plt.subplots() # Standard deviation
+    fig, ax4 = plt.subplots() # Median result
     ax1.plot(x, avg_fitness)
     ax2.plot(x, prob_c_after_d)
     ax3.plot(x, std_dev)
